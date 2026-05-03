@@ -1,0 +1,147 @@
+<div class="card-formulario">
+    <h2 style="color: var(--primary-color);">{{ esEdicion ? 'Editar Paciente' : 'Registrar Nuevo Paciente' }}</h2>
+
+    <div *ngIf="errorMsg" class="alerta-error">{{ errorMsg }}</div>
+    <div *ngIf="mensajeExito" class="alerta-error" style="background-color: #dcfce7; color: #166534; border:none;">{{
+        mensajeExito }}</div>
+
+    <form (ngSubmit)="guardarPaciente()">
+
+        <h3 class="section-title">Datos Personales</h3>
+        <div class="grid-2">
+            <div class="input-group">
+                <label>Nombre *</label>
+                <input type="text" [(ngModel)]="paciente.firstName" name="firstName" required>
+            </div>
+            <div class="input-group">
+                <label>Apellido *</label>
+                <input type="text" [(ngModel)]="paciente.lastName" name="lastName" required>
+            </div>
+            <div class="input-group">
+                <label>Fecha de Nacimiento</label>
+                <input type="date" [(ngModel)]="paciente.dateOfBirth" name="dateOfBirth">
+            </div>
+            
+            <div class="input-group">
+                <label>Habitación Asignada</label>
+                <select [(ngModel)]="paciente.RoomId" name="RoomId">
+                    <option value="">-- Sin asignar --</option>
+                    <option *ngFor="let h of listaHabitaciones" [value]="h.roomId">
+                        Pab. {{ h.roomPavilion }} - Piso {{ h.floor }} - Hab. {{ h.roomNumber }}
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <h3 class="section-title">Contacto de Emergencia</h3>
+        <div class="grid-2">
+            <div class="input-group">
+                <label>Nombre del Contacto</label>
+                <input type="text" [(ngModel)]="paciente.emergencyContact.firstName" name="ecFirst">
+            </div>
+            <div class="input-group">
+                <label>Apellido del Contacto</label>
+                <input type="text" [(ngModel)]="paciente.emergencyContact.lastName" name="ecLast">
+            </div>
+            <div class="input-group">
+                <label>Teléfono</label>
+                <input type="tel" [(ngModel)]="paciente.emergencyContact.phone" name="ecPhone">
+            </div>
+            <div class="input-group">
+                <label>Parentesco</label>
+                <input type="text" [(ngModel)]="paciente.emergencyContact.relationship" name="ecRel"
+                    placeholder="Ej. Hijo, Hermana...">
+            </div>
+            <div class="input-group" style="grid-column: span 2;">
+                <label>Email</label>
+                <input type="email" [(ngModel)]="paciente.emergencyContact.mail" name="ecMail">
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h3 class="section-title" style="border:none; margin:0;">Alergias</h3>
+            <button type="button" class="btn-add" (click)="agregarAlergia()">+ Añadir Alergia</button>
+        </div>
+        <div *ngFor="let alg of paciente.Allergies; let i = index" class="dynamic-row grid-3">
+            <div class="input-group">
+                <label>Nombre</label>
+                <input type="text" [(ngModel)]="alg.name" name="algName_{{i}}">
+            </div>
+            <div class="input-group">
+                <label>Tipo de Alérgeno</label>
+                <input type="text" [(ngModel)]="alg.allergenType" name="algType_{{i}}"
+                    placeholder="Ej. Alimento, Fármaco">
+            </div>
+            <div class="input-group">
+                <label>Diagnóstico (Detalles)</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" [(ngModel)]="alg.diagnostics" name="algDiag_{{i}}" style="flex:1;">
+                    <button type="button" class="btn-remove" (click)="removerAlergia(i)">X</button>
+                </div>
+            </div>
+        </div>
+        <p *ngIf="paciente.Allergies.length === 0" class="text-muted" style="margin-top: -0.5rem;">No hay alergias
+            registradas.</p>
+
+        <div class="section-header">
+            <h3 class="section-title" style="border:none; margin:0;">Enfermedades</h3>
+            <button type="button" class="btn-add" (click)="agregarEnfermedad()">+ Añadir Enfermedad</button>
+        </div>
+        <div *ngFor="let dis of paciente.Diseases; let i = index" class="dynamic-row">
+            <div class="grid-2">
+                <div class="input-group">
+                    <label>Nombre</label>
+                    <input type="text" [(ngModel)]="dis.name" name="disName_{{i}}">
+                </div>
+                <div class="input-group">
+                    <label>Diagnóstico</label>
+                    <input type="text" [(ngModel)]="dis.diagnostics" name="disDiag_{{i}}">
+                </div>
+            </div>
+            <div class="grid-3" style="margin-top: 1rem;">
+                <div class="input-group checkbox-group">
+                    <label>¿Es Contagiosa?</label>
+                    <input type="checkbox" [(ngModel)]="dis.isContagious" name="disCont_{{i}}">
+                </div>
+                <div class="input-group">
+                    <label>Vía de Transmisión</label>
+                    <input type="text" [(ngModel)]="dis.transmissionRoute" name="disTrans_{{i}}">
+                </div>
+                <div style="display: flex; align-items: flex-end; justify-content: flex-end;">
+                    <button type="button" class="btn-remove" (click)="removerEnfermedad(i)">Quitar</button>
+                </div>
+            </div>
+        </div>
+        <p *ngIf="paciente.Diseases.length === 0" class="text-muted" style="margin-top: -0.5rem;">No hay enfermedades
+            registradas.</p>
+
+        <div class="section-header">
+            <h3 class="section-title" style="border:none; margin:0;">Dispositivos IoT (Wearables)</h3>
+            <button type="button" class="btn-add" (click)="agregarWearable()">+ Asignar Dispositivo</button>
+        </div>
+        <div *ngFor="let w of paciente.wearableDevices; let i = index" class="dynamic-row"
+            style="display: flex; gap: 1rem; align-items: flex-end;">
+            
+            <div class="input-group" style="flex: 1;">
+                <label>Dispositivo (IoT) *</label>
+                <select [(ngModel)]="w.wearableId" name="wId_{{i}}" required>
+                    <option value="" disabled>-- Seleccione un dispositivo --</option>
+                    <option *ngFor="let d of listaDispositivos" [value]="d.wearableId">
+                        MAC: {{ d.macAddress }} (Bat: {{ d.batteryLevel }}%)
+                    </option>
+                </select>
+            </div>
+            
+            <button type="button" class="btn-remove" (click)="removerWearable(i)">Quitar</button>
+        </div>
+        <p *ngIf="paciente.wearableDevices.length === 0" class="text-muted"
+            style="margin-top: -0.5rem; margin-bottom: 2rem;">No hay dispositivos asignados.</p>
+
+        <div class="acciones">
+            <button type="button" class="btn-cancelar" (click)="cancelar()">Cancelar</button>
+            <button type="submit" class="btn-guardar" [disabled]="cargando">
+                {{ cargando ? 'Procesando...' : (esEdicion ? 'Actualizar Paciente' : 'Guardar Paciente') }}
+            </button>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,91 @@
+<div class="contenedor-tabla">
+    <div class="cabecera">
+        <h2 style="color: var(--primary-color); margin: 0;">Pacientes Registrados</h2>
+        <button class="btn-nuevo" routerLink="/crear-paciente">+ Nuevo Paciente</button>
+    </div>
+
+    <div *ngIf="errorMsg"
+        style="background-color: #fee2e2; color: #ef4444; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+        {{ errorMsg }}
+    </div>
+    <div *ngIf="mensajeExito"
+        style="background-color: #dcfce7; color: #166534; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+        {{ mensajeExito }}
+    </div>
+
+    @if (cargando) {
+    <p>Conectando con Python para traer los datos...</p>
+    } @else {
+    <table class="tabla-moderna">
+        <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>Habitación</th>
+                <th>Contacto Emergencia</th>
+                <th>Condiciones Médicas</th>
+                <th>Dispositivos</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (paciente of pacientes; track paciente.patientId) {
+            <tr>
+                <td>
+                    <div style="font-weight: 600;">{{ paciente.firstName }} {{ paciente.lastName }}</div>
+                    <div style="font-size: 0.85rem; color: #6b7280;">Nac: {{ paciente.dateOfBirth | date:'shortDate' }}
+                    </div>
+                </td>
+
+                <td>
+                    <span class="badge-room">{{ paciente.Room?.roomNumber || 'Sin asignar' }}</span>
+                </td>
+
+                <td>
+                    <div *ngIf="paciente.emergencyContact?.firstName">
+                        {{ paciente.emergencyContact.firstName }}
+                        <span style="font-size: 0.85rem; color: #6b7280;">({{ paciente.emergencyContact.relationship
+                            }})</span>
+                        <div style="font-size: 0.85rem;">📞 {{ paciente.emergencyContact.phone }}</div>
+                    </div>
+                    <span *ngIf="!paciente.emergencyContact?.firstName"
+                        style="color: #9ca3af; font-size: 0.9rem;">N/A</span>
+                </td>
+
+                <td>
+                    <div style="display: flex; flex-direction: column; gap: 0.3rem; align-items: flex-start;">
+                        <span class="badge badge-alergia" *ngIf="paciente.Allergies?.length > 0">
+                            {{ paciente.Allergies.length }} Alergia(s)
+                        </span>
+                        <span class="badge badge-enfermedad" *ngIf="paciente.Diseases?.length > 0">
+                            {{ paciente.Diseases.length }} Enfermedad(es)
+                        </span>
+                        <span *ngIf="paciente.Allergies?.length === 0 && paciente.Diseases?.length === 0"
+                            style="color: #9ca3af; font-size: 0.9rem;">Sano</span>
+                    </div>
+                </td>
+
+                <td>
+                    <span class="badge badge-wearable" *ngIf="paciente.wearableDevices?.length > 0">
+                        {{ paciente.wearableDevices.length }} Activo(s)
+                    </span>
+                    <span *ngIf="paciente.wearableDevices?.length === 0"
+                        style="color: #9ca3af; font-size: 0.9rem;">Ninguno</span>
+                </td>
+
+                <td style="display: flex; gap: 0.5rem; flex-direction: column;">
+                    <button class="btn-editar" [routerLink]="['/editar-paciente', paciente.patientId]">Editar /
+                        Ver</button>
+                    <button class="btn-editar" style="color: #ef4444; border-color: #ef4444;"
+                        (click)="eliminarPaciente(paciente.patientId)">Borrar</button>
+                </td>
+            </tr>
+            } @empty {
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">No hay pacientes registrados
+                    aún.</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+    }
+</div>

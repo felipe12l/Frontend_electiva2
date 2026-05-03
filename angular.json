@@ -22,7 +22,8 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              }
+              },
+              "src/assets"
             ],
             "styles": [
               "src/styles.css"
@@ -48,6 +49,22 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "client2": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.client2.ts"
+                }
+              ]
+            },
+            "client3": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.client3.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -60,6 +77,12 @@
             },
             "development": {
               "buildTarget": "frontend-ancianato:build:development"
+            },
+            "client2": {
+              "buildTarget": "frontend-ancianato:build:client2"
+            },
+            "client3": {
+              "buildTarget": "frontend-ancianato:build:client3"
             }
           },
           "defaultConfiguration": "development"

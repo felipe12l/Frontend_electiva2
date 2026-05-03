@@ -1,0 +1,84 @@
+<div class="vista-dividida">
+
+    <div class="panel panel-formulario">
+        <h3 style="color: var(--primary-color);">
+            {{ dispositivoEnEdicionId ? 'Editar Dispositivo' : 'Nuevo Dispositivo' }}
+        </h3>
+
+        <div *ngIf="errorMsg" class="alerta-error">{{ errorMsg }}</div>
+        <div *ngIf="mensajeExito" class="alerta-exito">{{ mensajeExito }}</div>
+
+        <form (ngSubmit)="guardarDispositivo()">
+            <div class="input-group">
+                <label>Dirección MAC *</label>
+                <input type="text" [(ngModel)]="nuevoDispositivo.macAddress" name="macAddress" placeholder="Ej. 00:1B:44:11:3A:B7" required>
+            </div>
+
+            <div class="input-group">
+                <label>Nivel de Batería (%) *</label>
+                <input type="number" [(ngModel)]="nuevoDispositivo.batteryLevel" name="battery" min="0" max="100" required>
+            </div>
+
+            <div class="input-group">
+                <label>Estado del Dispositivo</label>
+                <select [(ngModel)]="nuevoDispositivo.isActive" name="isActive" class="form-select">
+                    <option [value]="true">Activo (Monitoreando)</option>
+                    <option [value]="false">Inactivo / En Mantenimiento</option>
+                </select>
+            </div>
+
+            <div class="acciones-form">
+                <button type="button" class="btn-cancelar" *ngIf="dispositivoEnEdicionId" (click)="cancelarEdicion()">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn-guardar" [disabled]="guardando">
+                    {{ guardando ? 'Procesando...' : (dispositivoEnEdicionId ? 'Actualizar' : 'Registrar') }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="panel panel-lista">
+        <h3 style="color: var(--primary-color);">Dispositivos Registrados</h3>
+
+        @if (cargando) {
+        <p>Cargando inventario de dispositivos...</p>
+        } @else {
+        <table class="tabla-moderna">
+            <thead>
+                <tr>
+                    <th>Dirección MAC</th>
+                    <th>Batería</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (disp of dispositivos; track disp.wearableId) {
+                <tr>
+                    <td style="font-family: monospace; font-weight: 600;">{{ disp.macAddress }}</td>
+                    <td>
+                        <span [ngStyle]="{'color': disp.batteryLevel < 20 ? '#ef4444' : (disp.batteryLevel < 50 ? '#f59e0b' : '#10b981'), 'font-weight': 'bold'}">
+                            {{ disp.batteryLevel }}%
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge" [ngClass]="disp.isActive ? 'badge-activo' : 'badge-inactivo'">
+                            {{ disp.isActive ? 'Activo' : 'Inactivo' }}
+                        </span>
+                    </td>
+                    <td class="acciones-tabla">
+                        <button class="btn-icon btn-editar" (click)="editarDispositivo(disp)">Editar</button>
+                        <button class="btn-icon btn-eliminar" (click)="eliminarDispositivo(disp.wearableId)">Borrar</button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem;">No hay dispositivos registrados.</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+</div>

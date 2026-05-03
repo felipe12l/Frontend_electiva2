@@ -1,0 +1,61 @@
+<div class="vista-dividida">
+    <!-- PANEL FORMULARIO -->
+    <div class="panel panel-formulario">
+        <h3 style="color: var(--primary-color);">{{ tipoEnEdicionId ? 'Editar Tipo' : 'Nuevo Tipo de Alerta' }}</h3>
+        <div *ngIf="errorMsg" class="alerta-error">{{ errorMsg }}</div>
+        <div *ngIf="mensajeExito" class="alerta-exito">{{ mensajeExito }}</div>
+
+        <form (ngSubmit)="guardarTipo()">
+            <div class="input-group">
+                <label>Código Interno *</label>
+                <input type="text" [(ngModel)]="nuevoTipo.code" name="code" placeholder="Ej. CAIDA_01" required>
+            </div>
+            <div class="input-group">
+                <label>Nombre de la Alerta *</label>
+                <input type="text" [(ngModel)]="nuevoTipo.name" name="name" placeholder="Ej. Caída Detectada" required>
+            </div>
+            <div class="input-group">
+                <label>Descripción / Protocolo</label>
+                <textarea [(ngModel)]="nuevoTipo.description" name="desc" rows="3" style="width:100%; border:1.5px solid #e5e7eb; border-radius:8px; padding:0.75rem; font-family:inherit;"></textarea>
+            </div>
+            <div class="acciones-form">
+                <button type="button" class="btn-cancelar" *ngIf="tipoEnEdicionId" (click)="cancelarEdicion()">Cancelar</button>
+                <button type="submit" class="btn-guardar" [disabled]="guardando">{{ guardando ? 'Procesando...' : (tipoEnEdicionId ? 'Actualizar' : 'Registrar') }}</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- PANEL LISTA -->
+    <div class="panel panel-lista">
+        <h3 style="color: var(--primary-color);">Catálogo de Emergencias</h3>
+        @if (cargando) {
+            <p>Cargando catálogo...</p>
+        } @else {
+            <table class="tabla-moderna">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Protocolo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (tipo of tiposAlerta; track tipo.alertTypeId) {
+                    <tr>
+                        <td><span class="badge" style="background:#e0f2fe; color:#0369a1;">{{ tipo.code }}</span></td>
+                        <td style="font-weight: 600;">{{ tipo.name }}</td>
+                        <td style="font-size: 0.85rem; color:#6b7280;">{{ tipo.description || 'Sin descripción' }}</td>
+                        <td class="acciones-tabla">
+                            <button class="btn-icon btn-editar" (click)="editarTipo(tipo)">Editar</button>
+                            <button class="btn-icon btn-eliminar" (click)="eliminarTipo(tipo.alertTypeId)">Borrar</button>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr><td colspan="5" style="text-align: center; padding: 2rem;">No hay tipos de alerta registrados.</td></tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

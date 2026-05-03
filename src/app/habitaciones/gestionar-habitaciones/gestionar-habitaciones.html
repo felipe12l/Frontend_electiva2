@@ -1,0 +1,82 @@
+<div class="vista-dividida">
+
+    <div class="panel panel-formulario">
+        <h3 style="color: var(--primary-color);">
+            {{ habitacionEnEdicionId ? 'Editar Habitación' : 'Nueva Habitación' }}
+        </h3>
+
+        <div *ngIf="errorMsg" class="alerta-error">
+            {{ errorMsg }}
+        </div>
+
+        <div *ngIf="mensajeExito" class="alerta-exito">
+            {{ mensajeExito }}
+        </div>
+
+        <form (ngSubmit)="guardarHabitacion()">
+            <div class="input-group">
+                <label>Pabellón *</label>
+                <input type="text" [(ngModel)]="nuevaHabitacion.roomPavilion" name="pavilion"
+                    placeholder="Ej. Norte, Sur..." required>
+            </div>
+
+            <div class="input-group">
+                <label>Piso *</label>
+                <input type="number" [(ngModel)]="nuevaHabitacion.floor" name="floor" placeholder="Ej. 1, 2, 3..."
+                    required>
+            </div>
+
+            <div class="input-group">
+                <label>Número de Habitación *</label>
+                <input type="text" [(ngModel)]="nuevaHabitacion.roomNumber" name="roomNumber"
+                    placeholder="Ej. 101, 102A..." required>
+            </div>
+
+            <div class="acciones-form">
+                <button type="button" class="btn-cancelar" *ngIf="habitacionEnEdicionId" (click)="cancelarEdicion()">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="btn-guardar" [disabled]="guardando">
+                    {{ guardando ? 'Procesando...' : (habitacionEnEdicionId ? 'Actualizar' : 'Crear Habitación') }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="panel panel-lista">
+        <h3 style="color: var(--primary-color);">Habitaciones Registradas</h3>
+
+        @if (cargando) {
+        <p>Cargando habitaciones...</p>
+        } @else {
+        <table class="tabla-moderna">
+            <thead>
+                <tr>
+                    <th>Pabellón</th>
+                    <th>Piso</th>
+                    <th>Número</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (hab of habitaciones; track hab.roomId) {
+                <tr>
+                    <td>{{ hab.roomPavilion }}</td>
+                    <td>{{ hab.floor }}</td>
+                    <td><span class="badge">{{ hab.roomNumber }}</span></td>
+                    <td class="acciones-tabla">
+                        <button class="btn-icon btn-editar" (click)="editarHabitacion(hab)">Editar</button>
+                        <button class="btn-icon btn-eliminar" (click)="eliminarHabitacion(hab.roomId)">Borrar</button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem;">No hay habitaciones registradas.</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+</div>

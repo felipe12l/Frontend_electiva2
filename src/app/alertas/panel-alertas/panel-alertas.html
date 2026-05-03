@@ -1,0 +1,125 @@
+<div class="vista-dividida">
+    <div class="panel panel-formulario">
+        <h3 style="color: var(--primary-color);">{{ alertaEnEdicionId ? 'Gestionar Emergencia' : 'Disparar Alerta Manual' }}</h3>
+        
+        <div *ngIf="errorMsg" class="alerta-error">{{ errorMsg }}</div>
+        <div *ngIf="mensajeExito" class="alerta-exito">{{ mensajeExito }}</div>
+
+        <form (ngSubmit)="guardarAlerta()">
+            <div class="input-group">
+                <label>Paciente *</label>
+                <select [(ngModel)]="nuevaAlerta.patientId" name="pId" (ngModelChange)="onPacienteChange()" [disabled]="alertaEnEdicionId !== null" class="form-select" required>
+                    <option value="" disabled>-- Seleccione un paciente --</option>
+                    <option *ngFor="let p of listaPacientes" [value]="p.patientId">
+                        {{ p.firstName }} {{ p.lastName }}
+                    </option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>Dispositivo IoT *</label>
+                <select [(ngModel)]="nuevaAlerta.wearableId" name="wId" [disabled]="alertaEnEdicionId !== null" class="form-select" required>
+                    <option value="" disabled>-- Seleccione un dispositivo --</option>
+                    <option *ngFor="let d of listaDispositivos" [value]="d.wearableId">
+                        MAC: {{ d.macAddress }} (Bat: {{ d.batteryLevel }}%)
+                    </option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Tipo de Emergencia *</label>
+                <select [(ngModel)]="nuevaAlerta.alertType" name="aType" [disabled]="alertaEnEdicionId !== null" class="form-select" required>
+                    <option value="" disabled>-- Seleccione el protocolo --</option>
+                    <option *ngFor="let t of listaTiposAlerta" [value]="t.alertTypeId">
+                        [{{ t.code }}] {{ t.name }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="grid-2">
+                <div class="input-group">
+                    <label>Nivel de Gravedad</label>
+                    <select [(ngModel)]="nuevaAlerta.alertLevel" name="lvl" class="form-select">
+                        <option value="Bajo">Bajo</option>
+                        <option value="Medio">Medio</option>
+                        <option value="Alto">Alto</option>
+                        <option value="Crítico">Crítico</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>Estado</label>
+                    <select [(ngModel)]="nuevaAlerta.alertStatus" name="status" class="form-select">
+                        <option value="Activa">Activa</option>
+                        <option value="En Revisión">En Revisión</option>
+                        <option value="Resuelta">Resuelta</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="acciones-form">
+                <button type="button" class="btn-cancelar" *ngIf="alertaEnEdicionId" (click)="cancelarEdicion()">Cancelar</button>
+                <button type="submit" class="btn-guardar" [disabled]="guardando">{{ guardando ? 'Procesando...' : (alertaEnEdicionId ? 'Actualizar Estado' : 'Lanzar Alerta') }}</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="panel panel-lista">
+        <h3 style="color: var(--primary-color);">Centro de Monitoreo</h3>
+        @if (cargando) {
+            <p>Conectando con el sistema de alertas...</p>
+        } @else {
+            <table class="tabla-moderna">
+                <thead>
+                    <tr>
+                        <th>Hora Alerta</th>
+                        <th>Paciente / Disp.</th>
+                        <th>Gravedad</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (alerta of alertas; track alerta.alertId) {
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600;">{{ alerta.createdAt | date:'shortTime' }}</div>
+                            <div style="font-size: 0.8rem; color:#6b7280;">{{ alerta.createdAt | date:'shortDate' }}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600; font-size: 0.95rem; color: #1f2937;">
+                                {{ getNombrePaciente(alerta.patientId) }}
+                            </div>
+                            <div style="font-size: 0.85rem; font-family: monospace; color: #6b7280; margin-bottom: 0.3rem;">
+                                IoT: {{ getMacDispositivo(alerta.wearableId) }}
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--primary-color); font-weight: 500;">
+                                🚨 {{ getNombreAlerta(alerta.alertType) }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge" 
+                                [ngClass]="{'badge-critico': alerta.alertLevel === 'Crítico', 'badge-alto': alerta.alertLevel === 'Alto', 'badge-medio': alerta.alertLevel === 'Medio', 'badge-bajo': alerta.alertLevel === 'Bajo'}">
+                                {{ alerta.alertLevel }}
+                            </span>
+                        </td>
+                        <td>
+                            <span style="font-weight: 600; font-size: 0.9rem;"
+                                [ngStyle]="{'color': alerta.alertStatus === 'Resuelta' ? '#10b981' : (alerta.alertStatus === 'Activa' ? '#ef4444' : '#f59e0b')}">
+                                {{ alerta.alertStatus }}
+                            </span>
+                            <div *ngIf="alerta.resolvedAt" style="font-size: 0.75rem; color:#6b7280;">Resuelta a las {{ alerta.resolvedAt | date:'shortTime' }}</div>
+                        </td>
+                        <td class="acciones-tabla">
+                            <button class="btn-icon btn-editar" (click)="editarAlerta(alerta)">Gestionar</button>
+                            <button class="btn-icon btn-eliminar" (click)="eliminarAlerta(alerta.alertId)">Eliminar</button>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr><td colspan="5" style="text-align: center; padding: 2rem; color: #10b981; font-weight: 600;">Sistema estable. No hay emergencias registradas.</td></tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

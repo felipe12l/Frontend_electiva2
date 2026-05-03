@@ -1,0 +1,17 @@
+<div class="app-layout">
+    <aside class="sidebar">
+        <img [src]="theme.logo" class="logo-pequeno">
+        <nav>
+            <a routerLink="/pacientes">Pacientes</a>
+            <a routerLink="/alertas">Emergencias</a>
+            <a routerLink="/tipos-alerta">Tipos de Alertas</a>
+            <a routerLink="/dispositivos">Dispositivos IoT</a>
+            <a routerLink="/habitaciones">Habitaciones</a>
+        </nav>
+        <button (click)="logout()">Cerrar Sesión</button>
+    </aside>
+
+    <main class="contenido-central">
+        <router-outlet></router-outlet>
+    </main>
+</div>

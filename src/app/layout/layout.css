@@ -1,0 +1,67 @@
+.app-layout {
+    display: flex;
+    height: 100vh;
+    background-color: var(--background-color);
+    font-family: 'Inter', sans-serif;
+}
+
+.sidebar {
+    width: 260px;
+    background-color: white;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.03);
+}
+
+.logo-pequeno {
+    max-width: 140px;
+    margin: 0 auto 2rem auto;
+    display: block;
+    object-fit: contain;
+}
+
+nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+nav a {
+    text-decoration: none;
+    color: #4b5563;
+    padding: 0.875rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+nav a:hover {
+    background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    color: var(--primary-color);
+}
+
+.sidebar button {
+    margin-top: auto;
+    padding: 0.875rem;
+    background-color: #fee2e2;
+    color: #ef4444;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sidebar button:hover {
+    background-color: #ef4444;
+    color: white;
+}
+
+.contenido-central {
+    flex: 1;
+    padding: 2.5rem;
+    overflow-y: auto;
+}
