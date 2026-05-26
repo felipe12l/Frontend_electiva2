@@ -39,7 +39,14 @@
     </div>
 
     <div class="panel panel-lista">
-        <h3 style="color: var(--primary-color);">Dispositivos Registrados</h3>
+        <!-- ENCABEZADO CON INDICADOR DE CONEXIÓN -->
+        <div class="panel-header">
+            <h3 style="color: var(--primary-color); margin-bottom: 0;">Dispositivos Registrados</h3>
+            <span class="indicador-ws" [ngClass]="wsConectado ? 'ws-online' : 'ws-offline'">
+                <span class="punto-estado"></span>
+                {{ wsConectado ? 'Datos en Vivo' : 'Sin conexión IoT' }}
+            </span>
+        </div>
 
         @if (cargando) {
         <p>Cargando inventario de dispositivos...</p>
@@ -58,14 +65,54 @@
                 <tr>
                     <td style="font-family: monospace; font-weight: 600;">{{ disp.macAddress }}</td>
                     <td>
-                        <span [ngStyle]="{'color': disp.batteryLevel < 20 ? '#ef4444' : (disp.batteryLevel < 50 ? '#f59e0b' : '#10b981'), 'font-weight': 'bold'}">
-                            {{ disp.batteryLevel }}%
-                        </span>
+                        <div class="battery-container-modern">
+                            <!-- Physical Battery Icon -->
+                            <div class="battery-icon-wrapper" [ngClass]="{'is-charging': disp.isCharging}">
+                                <div class="battery-body">
+                                    <div class="battery-level-fill" 
+                                         [ngStyle]="{
+                                           'width': getBatteryBarWidth(disp.batteryLevel), 
+                                           'background-color': getBatteryColor(disp.batteryLevel, disp.isCharging)
+                                         }"
+                                         [ngClass]="{
+                                            'charging-animation': disp.isCharging,
+                                            'low-battery-pulse': disp.batteryLevel <= 20 && !disp.isCharging
+                                         }">
+                                    </div>
+                                    <!-- Lightning bolt inside the battery when charging -->
+                                    <span class="charging-bolt" *ngIf="disp.isCharging">⚡</span>
+                                </div>
+                                <div class="battery-cap"></div>
+                            </div>
+                            
+                            <!-- Battery Vitals and Metadata -->
+                            <div class="battery-vitals">
+                                <span class="battery-percentage" [ngStyle]="{'color': getBatteryColor(disp.batteryLevel, disp.isCharging)}">
+                                    {{ disp.batteryLevel }}%
+                                </span>
+                                <span class="battery-voltage-badge" *ngIf="disp.batteryVoltage > 0">
+                                    {{ disp.batteryVoltage | number:'1.2-2' }}V
+                                </span>
+                                <span class="charging-status-text" *ngIf="disp.isCharging">
+                                    Cargando...
+                                </span>
+                            </div>
+                            
+                            <span *ngIf="disp._lastBatteryUpdate" class="battery-live-tag">
+                                <span class="live-dot"></span> LIVE
+                            </span>
+                        </div>
                     </td>
                     <td>
-                        <span class="badge" [ngClass]="disp.isActive ? 'badge-activo' : 'badge-inactivo'">
-                            {{ disp.isActive ? 'Activo' : 'Inactivo' }}
-                        </span>
+                        <div class="status-cell">
+                            <span class="badge" [ngClass]="disp.isActive ? 'badge-activo' : 'badge-inactivo'">
+                                <span class="punto-estado-mini" [ngClass]="disp.isActive ? 'punto-activo' : 'punto-inactivo'"></span>
+                                {{ disp.isActive ? 'Online' : 'Offline' }}
+                            </span>
+                            <span *ngIf="disp._lastStatusUpdate" class="status-updated">
+                                Actualizado
+                            </span>
+                        </div>
                     </td>
                     <td class="acciones-tabla">
                         <button class="btn-icon btn-editar" (click)="editarDispositivo(disp)">Editar</button>
@@ -74,7 +121,7 @@
                 </tr>
                 } @empty {
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 2rem;">No hay dispositivos registrados.</td>
+                    <td colspan="4" style="text-align: center; padding: 2rem;">No hay dispositivos registrados.</td>
                 </tr>
                 }
             </tbody>

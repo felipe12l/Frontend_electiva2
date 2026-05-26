@@ -1,4 +1,5 @@
 <div class="vista-dividida">
+
     <div class="panel panel-formulario">
         <h3 style="color: var(--primary-color);">{{ alertaEnEdicionId ? 'Gestionar Emergencia' : 'Disparar Alerta Manual' }}</h3>
         
@@ -20,12 +21,12 @@
                 <label>Dispositivo IoT *</label>
                 <select [(ngModel)]="nuevaAlerta.wearableId" name="wId" [disabled]="alertaEnEdicionId !== null" class="form-select" required>
                     <option value="" disabled>-- Seleccione un dispositivo --</option>
-                    <option *ngFor="let d of listaDispositivos" [value]="d.wearableId">
-                        MAC: {{ d.macAddress }} (Bat: {{ d.batteryLevel }}%)
+                    <option *ngFor="let d of listaDispositivosActivos" [value]="d.wearableId">
+                        MAC: {{ d.macAddress }} (Bat: {{ d.batteryLevel }}%{{ d.isCharging ? ' ⚡' : '' }})
                     </option>
                 </select>
             </div>
-
+            
             <div class="input-group">
                 <label>Tipo de Emergencia *</label>
                 <select [(ngModel)]="nuevaAlerta.alertType" name="aType" [disabled]="alertaEnEdicionId !== null" class="form-select" required>
@@ -65,7 +66,23 @@
     </div>
 
     <div class="panel panel-lista">
-        <h3 style="color: var(--primary-color);">Centro de Monitoreo</h3>
+        <!-- ENCABEZADO CON INDICADOR DE CONEXIÓN -->
+        <div class="panel-header">
+            <h3 style="color: var(--primary-color); margin-bottom: 0;">Centro de Monitoreo</h3>
+            <div class="indicadores-estado">
+                <span class="indicador-ws" [ngClass]="wsConectado ? 'ws-online' : 'ws-offline'">
+                    <span class="punto-estado"></span>
+                    {{ wsConectado ? 'Tiempo Real' : 'Desconectado' }}
+                </span>
+                <span class="contador-alertas" *ngIf="alertasActivas > 0">
+                    {{ alertasActivas }} activa{{ alertasActivas > 1 ? 's' : '' }}
+                </span>
+                <span class="contador-revision" *ngIf="alertasEnRevision > 0">
+                    {{ alertasEnRevision }} en revisión
+                </span>
+            </div>
+        </div>
+
         @if (cargando) {
             <p>Conectando con el sistema de alertas...</p>
         } @else {
@@ -81,25 +98,34 @@
                 </thead>
                 <tbody>
                     @for (alerta of alertas; track alerta.alertId) {
-                    <tr>
+                    <tr [ngClass]="{'fila-nueva': alerta.alertStatus === 'Activa', 'fila-resuelta': alerta.alertStatus === 'Resuelta'}">
                         <td>
-                            <div style="font-weight: 600;">{{ alerta.createdAt | date:'shortTime' }}</div>
-                            <div style="font-size: 0.8rem; color:#6b7280;">{{ alerta.createdAt | date:'shortDate' }}</div>
+                            <div style="font-weight: 600;">{{ alerta.createdAt | date:'hh:mm:ss a':'America/Bogota' }}</div>
+                            <div style="font-size: 0.8rem; color:#6b7280;">{{ alerta.createdAt | date:'dd/MM/yyyy':'America/Bogota' }}</div>
                         </td>
                         <td>
                             <div style="font-weight: 600; font-size: 0.95rem; color: #1f2937;">
                                 {{ getNombrePaciente(alerta.patientId) }}
                             </div>
-                            <div style="font-size: 0.85rem; font-family: monospace; color: #6b7280; margin-bottom: 0.3rem;">
-                                IoT: {{ getMacDispositivo(alerta.wearableId) }}
+                            <div style="font-size: 0.85rem; font-family: monospace; color: #6b7280; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.4rem;">
+                                <span>IoT: {{ getMacDispositivo(alerta.wearableId) }}</span>
+                                <span *ngIf="getDispositivo(alerta.wearableId) as disp" 
+                                      class="badge-bat-mini" 
+                                      [ngStyle]="{'background-color': getBatteryColor(disp.batteryLevel, disp.isCharging)}"
+                                      [title]="disp.isCharging ? 'Cargando (' + disp.batteryLevel + '%)' : 'Batería: ' + disp.batteryLevel + '%'">
+                                    {{ disp.isCharging ? '⚡' : '🔋' }} {{ disp.batteryLevel }}%
+                                </span>
                             </div>
                             <div style="font-size: 0.85rem; color: var(--primary-color); font-weight: 500;">
                                 🚨 {{ getNombreAlerta(alerta.alertType) }}
+                                <span *ngIf="alerta.bpm && alerta.bpm > 0" style="font-weight: 600; color: #dc2626;">
+                                    ({{ alerta.bpm }} BPM)
+                                </span>
                             </div>
                         </td>
                         <td>
                             <span class="badge" 
-                                [ngClass]="{'badge-critico': alerta.alertLevel === 'Crítico', 'badge-alto': alerta.alertLevel === 'Alto', 'badge-medio': alerta.alertLevel === 'Medio', 'badge-bajo': alerta.alertLevel === 'Bajo'}">
+                                [ngClass]="{'badge-critico': alerta.alertLevel === 'Crítico' || alerta.alertLevel === 'Critico', 'badge-alto': alerta.alertLevel === 'Alto', 'badge-medio': alerta.alertLevel === 'Medio', 'badge-bajo': alerta.alertLevel === 'Bajo'}">
                                 {{ alerta.alertLevel }}
                             </span>
                         </td>
@@ -108,9 +134,20 @@
                                 [ngStyle]="{'color': alerta.alertStatus === 'Resuelta' ? '#10b981' : (alerta.alertStatus === 'Activa' ? '#ef4444' : '#f59e0b')}">
                                 {{ alerta.alertStatus }}
                             </span>
-                            <div *ngIf="alerta.resolvedAt" style="font-size: 0.75rem; color:#6b7280;">Resuelta a las {{ alerta.resolvedAt | date:'shortTime' }}</div>
+                            <div *ngIf="alerta.resolvedAt" style="font-size: 0.75rem; color:#6b7280;">Resuelta a las {{ alerta.resolvedAt | date:'hh:mm:ss a':'America/Bogota' }}</div>
                         </td>
                         <td class="acciones-tabla">
+                            <!-- Botones de acción rápida para gestión profesional -->
+                            @if (alerta.alertStatus === 'Activa') {
+                                <button class="btn-icon btn-atender" (click)="atenderAlerta(alerta)" title="Marcar como atendida">
+                                    Atender
+                                </button>
+                            }
+                            @if (alerta.alertStatus === 'En Revisión') {
+                                <button class="btn-icon btn-resolver" (click)="resolverAlerta(alerta)" title="Marcar como resuelta">
+                                    Resolver
+                                </button>
+                            }
                             <button class="btn-icon btn-editar" (click)="editarAlerta(alerta)">Gestionar</button>
                             <button class="btn-icon btn-eliminar" (click)="eliminarAlerta(alerta.alertId)">Eliminar</button>
                         </td>

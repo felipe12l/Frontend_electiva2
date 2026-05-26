@@ -14,4 +14,31 @@
     <main class="contenido-central">
         <router-outlet></router-outlet>
     </main>
+
+    <!-- NOTIFICACIÓN TOAST GLOBAL - ALERTA EN TIEMPO REAL -->
+    <div class="toast-alerta" *ngIf="alertaNueva" 
+         [ngClass]="{'toast-critico': alertaNueva.alertLevel === 'Crítico' || alertaNueva.alertLevel === 'Critico', 'toast-alto': alertaNueva.alertLevel === 'Alto'}">
+        <div class="toast-contenido">
+            <div class="toast-icono">🚨</div>
+            <div class="toast-info">
+                <strong>¡Nueva Alerta IoT!</strong>
+                <span>{{ alertaNueva.alertCode || 'Alerta del sensor' }} — Nivel: {{ alertaNueva.alertLevel }}</span>
+                <span *ngIf="alertaNueva.bpm" style="font-size:0.8rem;">BPM: {{ alertaNueva.bpm }}</span>
+            </div>
+            <button class="toast-cerrar" (click)="cerrarNotificacion()">✕</button>
+        </div>
+    </div>
+
+    <!-- Custom Beautiful Modal Overlay -->
+    <div class="modal-confirm-overlay" *ngIf="activeConfirm">
+        <div class="modal-confirm-card">
+            <div class="modal-confirm-icon">❓</div>
+            <h4 class="modal-confirm-title">{{ activeConfirm.title }}</h4>
+            <p class="modal-confirm-message">{{ activeConfirm.message }}</p>
+            <div class="modal-confirm-buttons">
+                <button class="btn-confirm-no" (click)="confirm(false)">Cancelar</button>
+                <button class="btn-confirm-yes" (click)="confirm(true)">Confirmar</button>
+            </div>
+        </div>
+    </div>
 </div>

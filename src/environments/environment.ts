@@ -1,7 +1,8 @@
 export const environment = {
     production: false,
     name: 'cliente1',
-    apiUrl: 'http://192.168.1.2/client1/',
+    apiUrl: 'http://192.168.0.100/client1/',
+    wsUrl: 'ws://192.168.0.100/client1/ws',
     theme: {
         primaryColor: '#0056b3',
         secondaryColor: '#ffffff',

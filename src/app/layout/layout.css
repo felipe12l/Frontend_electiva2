@@ -65,3 +65,189 @@ nav a:hover {
     padding: 2.5rem;
     overflow-y: auto;
 }
+
+/* Custom Beautiful Confirm Modal Styles */
+.modal-confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.45); /* backdrop dark opacity */
+    backdrop-filter: blur(4px); /* soft premium blur */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    animation: fadeIn 0.25s ease-out;
+}
+
+.modal-confirm-card {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 440px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    text-align: center;
+    animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-confirm-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.modal-confirm-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+}
+
+.modal-confirm-message {
+    color: #475569;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1.75rem;
+}
+
+.modal-confirm-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.modal-confirm-buttons button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-confirm-no {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+.btn-confirm-no:hover {
+    background-color: #e2e8f0;
+    color: #0f172a;
+}
+
+.btn-confirm-yes {
+    background-color: var(--primary-color, #10b981);
+    color: white;
+}
+
+.btn-confirm-yes:hover {
+    background-color: color-mix(in srgb, var(--primary-color, #10b981) 85%, black);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Global Toast Notification Styles */
+.toast-alerta {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 9999;
+    min-width: 360px;
+    max-width: 480px;
+    background: linear-gradient(135deg, #1e293b, #334155);
+    color: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+.toast-critico {
+    background: linear-gradient(135deg, #7f1d1d, #991b1b);
+    box-shadow: 0 20px 60px rgba(127, 29, 29, 0.4), 0 0 30px rgba(239, 68, 68, 0.2);
+    animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1), pulseBorder 1.5s infinite;
+}
+
+.toast-alto {
+    background: linear-gradient(135deg, #92400e, #b45309);
+    box-shadow: 0 20px 60px rgba(146, 64, 14, 0.4);
+}
+
+.toast-contenido {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem 1.5rem;
+}
+
+.toast-icono {
+    font-size: 2rem;
+    animation: shake 0.5s ease-in-out;
+}
+
+.toast-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0.2rem;
+}
+
+.toast-info strong {
+    font-size: 1rem;
+}
+
+.toast-info span {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.toast-cerrar {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.toast-cerrar:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(120%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+@keyframes pulseBorder {
+  0%, 100% { box-shadow: 0 20px 60px rgba(127, 29, 29, 0.4), 0 0 30px rgba(239, 68, 68, 0.2); }
+  50% { box-shadow: 0 20px 60px rgba(127, 29, 29, 0.6), 0 0 50px rgba(239, 68, 68, 0.4); }
+}

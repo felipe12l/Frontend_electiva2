@@ -19,9 +19,64 @@ h3 {
     padding-bottom: 0.75rem;
 }
 
+/* ============================================================
+   ENCABEZADO CON INDICADOR
+   ============================================================ */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.indicador-ws {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+}
+
+.ws-online {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.ws-offline {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.punto-estado {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.ws-online .punto-estado {
+    background-color: #22c55e;
+    box-shadow: 0 0 6px #22c55e;
+    animation: pulse-dot 2s infinite;
+}
+
+.ws-offline .punto-estado {
+    background-color: #ef4444;
+}
+
+/* ============================================================
+   MENSAJES
+   ============================================================ */
 .alerta-error { background-color: #fee2e2; color: #ef4444; padding: 0.8rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 500;}
 .alerta-exito { background-color: #dcfce7; color: #166534; padding: 0.8rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 500;}
 
+/* ============================================================
+   FORMULARIO
+   ============================================================ */
 .input-group { margin-bottom: 1.2rem; display: flex; flex-direction: column; }
 .input-group label { font-size: 0.9rem; font-weight: 500; color: #4b5563; margin-bottom: 0.4rem; }
 .input-group input, .form-select { padding: 0.75rem; border: 1.5px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 1rem;}
@@ -34,17 +89,258 @@ h3 {
 .btn-guardar { background-color: var(--primary-color); color: white; border: none; }
 .btn-guardar:disabled { opacity: 0.7; }
 
+/* ============================================================
+   TABLA
+   ============================================================ */
 .tabla-moderna { width: 100%; border-collapse: collapse; }
 .tabla-moderna th { background-color: #f9fafb; padding: 1rem; text-align: left; color: #4b5563; border-bottom: 2px solid #e5e7eb; }
 .tabla-moderna td { padding: 1rem; border-bottom: 1px solid #e5e7eb; }
 
-.badge { padding: 0.3rem 0.6rem; border-radius: 999px; font-weight: 600; font-size: 0.85rem; }
+/* ============================================================
+   CELDA DE BATERÍA - PREMIUM Y DINÁMICA
+   ============================================================ */
+.battery-container-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    position: relative;
+}
+
+.battery-icon-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 45px;
+    height: 22px;
+}
+
+.battery-body {
+    flex: 1;
+    height: 100%;
+    border: 2px solid #9ca3af;
+    border-radius: 6px;
+    padding: 2px;
+    background-color: rgba(243, 244, 246, 0.5);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    transition: border-color 0.3s ease;
+}
+
+.battery-icon-wrapper.is-charging .battery-body {
+    border-color: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.battery-cap {
+    width: 3px;
+    height: 8px;
+    background-color: #9ca3af;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    margin-left: 1px;
+    transition: background-color 0.3s ease;
+}
+
+.battery-icon-wrapper.is-charging .battery-cap {
+    background-color: #10b981;
+}
+
+.battery-level-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.8s ease, background-color 0.5s ease;
+}
+
+.charging-bolt {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #111827;
+    text-shadow: 0 0 3px white;
+    z-index: 2;
+    animation: bolt-pulse 1.2s infinite alternate;
+}
+
+.battery-vitals {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.battery-percentage {
+    font-weight: 750;
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.battery-voltage-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #4b5563;
+    background-color: #f3f4f6;
+    padding: 0.05rem 0.25rem;
+    border-radius: 4px;
+    width: fit-content;
+    border: 1px solid #e5e7eb;
+}
+
+.charging-status-text {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #10b981;
+    letter-spacing: 0.02em;
+    animation: text-pulse 1.5s infinite alternate;
+}
+
+/* Animaciones */
+.charging-animation {
+    animation: charge-slide 2s infinite ease-in-out;
+}
+
+.low-battery-pulse {
+    animation: low-pulse 1.2s infinite alternate;
+}
+
+@keyframes bolt-pulse {
+    0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+}
+
+@keyframes text-pulse {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+@keyframes charge-slide {
+    0%, 100% { opacity: 0.75; }
+    50% { opacity: 1; }
+}
+
+@keyframes low-pulse {
+    0% { box-shadow: 0 0 2px #ef4444; opacity: 0.8; }
+    100% { box-shadow: 0 0 8px #ef4444; opacity: 1; }
+}
+
+.battery-live-tag {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #10b981;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #f0fdf4;
+    padding: 0.1rem 0.4rem;
+    border-radius: 6px;
+    border: 1px solid #bbf7d0;
+}
+
+.live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #22c55e;
+    box-shadow: 0 0 4px #22c55e;
+    animation: live-dot-pulse 1s infinite alternate;
+}
+
+@keyframes live-dot-pulse {
+    0% { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+/* ============================================================
+   CELDA DE ESTADO
+   ============================================================ */
+.status-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.status-updated {
+    font-size: 0.7rem;
+    color: #22c55e;
+    font-weight: 600;
+    animation: fadeIn 0.5s;
+}
+
+.punto-estado-mini {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.3rem;
+}
+
+.punto-activo {
+    background-color: #22c55e;
+    box-shadow: 0 0 6px #22c55e;
+    animation: pulse-dot 2s infinite;
+}
+
+.punto-inactivo {
+    background-color: #9ca3af;
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+.badge { 
+    padding: 0.3rem 0.6rem; 
+    border-radius: 999px; 
+    font-weight: 600; 
+    font-size: 0.85rem; 
+    display: inline-flex;
+    align-items: center;
+}
 .badge-activo { background-color: #dcfce7; color: #166534; }
 .badge-inactivo { background-color: #f3f4f6; color: #4b5563; }
 
 .acciones-tabla { display: flex; gap: 0.5rem; }
-.btn-icon { padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+.btn-icon { padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; }
 .btn-editar { background-color: #e0f2fe; color: #0284c7; }
 .btn-editar:hover { background-color: #0284c7; color: white; }
 .btn-eliminar { background-color: #fee2e2; color: #ef4444; }
 .btn-eliminar:hover { background-color: #ef4444; color: white; }
+
+/* ============================================================
+   ANIMACIONES
+   ============================================================ */
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+@keyframes pulse-live {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1024px) {
+    .vista-dividida {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}

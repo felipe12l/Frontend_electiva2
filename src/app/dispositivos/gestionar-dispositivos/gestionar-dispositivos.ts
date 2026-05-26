@@ -1,7 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { DispositivosService } from '../dispositivos';
+import { WebsocketService } from '../../services/websocket.service';
+import { ConfirmModalService } from '../../services/confirm-modal.service';
 
 @Component({
   selector: 'app-gestionar-dispositivos',
@@ -10,7 +13,7 @@ import { DispositivosService } from '../dispositivos';
   templateUrl: './gestionar-dispositivos.html',
   styleUrl: './gestionar-dispositivos.css'
 })
-export class GestionarDispositivosComponent implements OnInit {
+export class GestionarDispositivosComponent implements OnInit, OnDestroy {
   dispositivos: any[] = [];
   
   nuevoDispositivo = {
@@ -26,14 +29,93 @@ export class GestionarDispositivosComponent implements OnInit {
   errorMsg = '';
   mensajeExito = '';
 
+  // WebSocket
+  wsConectado = false;
+
+  private subscriptions: Subscription[] = [];
+
   constructor(
     private dispositivosService: DispositivosService,
-    private cdr: ChangeDetectorRef
+    private wsService: WebsocketService,
+    private cdr: ChangeDetectorRef,
+    private confirmService: ConfirmModalService
   ) {}
 
   ngOnInit() {
     this.cargarDispositivos();
+    this.suscribirWebSocket();
   }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(s => s.unsubscribe());
+  }
+
+  // ============================================================
+  // SUSCRIPCIONES WEBSOCKET — BATERÍA Y ESTADO EN TIEMPO REAL
+  // ============================================================
+
+  private suscribirWebSocket() {
+    this.wsConectado = this.wsService.connected;
+    this.subscriptions.push(
+      this.wsService.onConnectionChange().subscribe(connected => {
+        this.wsConectado = connected;
+        this.cdr.detectChanges();
+      })
+    );
+
+    // Actualización de batería en tiempo real
+    this.subscriptions.push(
+      this.wsService.onBatteryUpdate().subscribe(event => {
+        const disp = this.dispositivos.find(d => d.wearableId === event.wearableId);
+        if (disp) {
+          disp.batteryLevel = event.batteryLevel;
+          disp.batteryVoltage = event.batteryVoltage;
+          disp.isCharging = event.isCharging;
+          disp._lastBatteryUpdate = new Date();
+          this.cdr.detectChanges();
+        }
+      })
+    );
+
+    // Estado del dispositivo (online/offline)
+    this.subscriptions.push(
+      this.wsService.onDeviceStatus().subscribe(event => {
+        const disp = this.dispositivos.find(d => d.wearableId === event.wearableId);
+        if (disp) {
+          disp.isActive = event.isActive;
+          disp._lastStatusUpdate = new Date();
+          this.cdr.detectChanges();
+        }
+      })
+    );
+  }
+
+  // ============================================================
+  // HELPERS DE UI
+  // ============================================================
+
+  getBatteryIcon(level: number, isCharging: boolean = false): string {
+    if (isCharging) return '⚡';
+    if (level > 75) return '🔋';
+    if (level > 50) return '🔋';
+    if (level > 20) return '🪫';
+    return '⚠️';
+  }
+
+  getBatteryColor(level: number, isCharging: boolean = false): string {
+    if (isCharging) return '#10b981';
+    if (level > 50) return '#10b981';
+    if (level > 20) return '#f59e0b';
+    return '#ef4444';
+  }
+
+  getBatteryBarWidth(level: number): string {
+    return Math.max(level, 5) + '%';
+  }
+
+  // ============================================================
+  // CRUD ORIGINAL
+  // ============================================================
 
   cargarDispositivos() {
     this.cargando = true;
@@ -93,8 +175,12 @@ export class GestionarDispositivosComponent implements OnInit {
     this.errorMsg = '';
   }
 
-  eliminarDispositivo(id: string) {
-    if (confirm('¿Estás seguro de que deseas eliminar este dispositivo?')) {
+  async eliminarDispositivo(id: string) {
+    const confirmed = await this.confirmService.confirm(
+      'Eliminar Dispositivo',
+      '¿Está seguro de que desea eliminar este dispositivo IoT de forma permanente?'
+    );
+    if (confirmed) {
       this.errorMsg = '';
       this.mensajeExito = '';
       this.dispositivosService.eliminarDispositivo(id).subscribe({
